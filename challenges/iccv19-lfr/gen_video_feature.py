@@ -61,19 +61,13 @@ def get_feature(buffer):
     db = mx.io.DataBatch(data=(data, ))
     net.model.forward(db, is_train=False)
     _embedding = net.model.get_outputs()[0].asnumpy()
-    _embedding = _embedding[0:input_count]
+    _embedding = _embedding[:input_count]
     if emb_size == 0:
         emb_size = _embedding.shape[1]
         print('set emb_size to ', emb_size)
     embedding = np.zeros((len(buffer), emb_size), dtype=np.float32)
-    if use_flip:
-        embedding1 = _embedding[0::2]
-        embedding2 = _embedding[1::2]
-        embedding = embedding1 + embedding2
-    else:
-        embedding = _embedding
-    embedding = sklearn.preprocessing.normalize(embedding)
-    return embedding
+    embedding = _embedding[::2] + _embedding[1::2] if use_flip else _embedding
+    return sklearn.preprocessing.normalize(embedding)
 
 
 def write_bin(path, m):
